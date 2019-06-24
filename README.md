@@ -11,7 +11,7 @@ Stagger is a Python Steganography module developed by Alex W. and is not intende
 ----
 
 
-# usage
+## usage
 
 all encodings are instantiated as an object.
 
