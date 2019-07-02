@@ -22,7 +22,12 @@ class stagger:
 		:return:  None returned if output path specified, as image will be saved to the path. List of pixels returned if nothing provided for output
 		:exception: (ValueError)
 		"""
-		pass
+		if (len(self._pixels) // 63)-6 > len(message):
+			raise ValueError(f"Message too long. "
+			                 f"This image can only encode a message with a length of {(len(self._pixels) // 63)-6} ")
+		
+		
+		
 		
 	
 	

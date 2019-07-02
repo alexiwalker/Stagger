@@ -106,14 +106,11 @@ class Naive:
 						buffer8 += b[-2:]
 					else:
 						if buffer8 == NULLBYTE:
-							raise ValueError('NULLBYTE')
+							raise core.LevelBreak('NULLBYTE')
 						buffer.append(buffer8)
 						buffer8 = b[-2:]
-		except ValueError as e:
-			if str(e) == 'NULLBYTE':
-				pass
-			else:
-				raise e
+		except core.LevelBreak:
+			pass
 	
 		
 		messageBinary = ''.join(buffer)

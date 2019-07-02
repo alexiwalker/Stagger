@@ -10,6 +10,9 @@ They are used by the encoding files
 saving images from modified pixels,
 
 """
+class LevelBreak(Exception):
+	pass
+
 from PIL import Image
 
 
