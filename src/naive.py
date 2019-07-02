@@ -17,188 +17,153 @@ Does not work on jpegs due to compression causing artifacting and damaging pixel
 PNG does work. Other filetypes unteste
 
 """
+NULLBYTE = '00000000'
 
 from src import core
-class naive:
-	def __init__(self,path):
-		self._path = path
-		self._pixels = core.get_file_content(self._path)
-	
-	
-	def encode_message(self,path,message, output=None):
-		pixels = self._pixels
-		bytestring = core.bytelist_to_string(core.string_to_ascii(message))
-		excode_len = "{0:b}".format(len(bytestring))
-	
-		newpixels = pixels.copy()
-		i=0
-		try:
-			while len(bytestring) > 0:
-				for p in pixels:
-					pix = [core.int_to_bin(x) for x in p]
-					
-					if len(bytestring) == 0:
-						break
-						
-					pix[0] = list(pix[0])
-					pix[0][-2:] = bytestring[0:2]
-					bytestring = bytestring[2:]
-			
-	
-					pix[1] = list(pix[1])
-					pix[1][-2:] = bytestring[0:2]
-	
-					bytestring = bytestring[2:]
-			
-	
-					pix[2] = list(pix[2])
-					pix[2][-2:] = bytestring[0:2]
-	
-					bytestring = bytestring[2:]
-	
-					pix[0] = ''.join(pix[0])
-					pix[1] = ''.join(pix[1])
-					pix[2] = ''.join(pix[2])
-					pix = [int(x,2) for x in pix]
-					pix = tuple(pix)
-					newpixels[i]=pix
-					i += 1
-	
-	
-					if len(bytestring) == 0:
-						break
-	
-		except:
-			return [False,'Unable to encode message']
-			
-		while len(excode_len) < 24:
-			excode_len = '0'+excode_len
-	
-		xorbits = ''
+
+
+class Naive:
+	def __init__(self, imcontents):
 		
-		a,b,c = newpixels[0]
-		a = "{0:b}".format(a)
-		b = "{0:b}".format(b)
-		c = "{0:b}".format(c)
-		for n in [a,b,c]:
-			while len(n) < 8:
-				n = '0'+n
-			xorbits += n
+		if type(imcontents) == str:
+			self._path = imcontents
+			self._pixels = core.get_file_content(self._path)
+		
+		
+		elif type(imcontents) == list:
+			self._pixels = imcontents
 	
-	
-		decode_bot = (int(xorbits,2)^int(excode_len,2)) #bitwise xor
-		encoded_len = '{0:b}'.format(decode_bot)
-	
-	
-		length_pixels = [newpixels[-3],newpixels[-2],newpixels[-1]]
+	def encode_message(self, message, output=None):
+		pixels = self._pixels
+		newPixels = pixels.copy()
+		messageBinary = ''.join(core.string_to_ascii(message))
+		messageBinary += NULLBYTE
+		
 		i = 0
-	
-		for pixels in length_pixels:
-			pix = [core.int_to_bin(p) for p in pixels]
-			
-			pix[0] = list(pix[0])
-			pix[0][-2:] = encoded_len[0:2]
-			pix[0] = ''.join(pix[0])
-			
-			encoded_len = encoded_len[2:]
-			
-			pix[1] = list(pix[1])
-			pix[1][-2:] = encoded_len[0:2]
-			pix[1] = ''.join(pix[1])
-			
-			encoded_len = encoded_len[2:]
-	
-			pix[2] = list(pix[2])
-			pix[2][-2:] = encoded_len[0:2]
-			pix[2] = ''.join(pix[2])
-	
-			encoded_len = encoded_len[2:]
-			
-			pix = [int(x, 2) for x in pix]
-			length_pixels[i] = tuple(pix)
-			i += 1
-	
-		r,g,b = newpixels[-4]
-		_r = '{0:b}'.format(r)
-		_r = list(_r)
-		_r[-2:] = encoded_len
-		_r = ''.join(_r)
-		r = int(_r,2)
-		newpixels[-4] = (r,g,b)
-	
-		i = 3
-		for pixel in length_pixels:
-			newpixels[-i] = pixel
-			i -= 1
-	
-	
-		#if you want the pixels directly and not to create an output, set output to '', False or None
+		while len(messageBinary) > 0:
+			for pixel in pixels:
+				
+				b_pixel = [core.int_to_bin(x) for x in pixel]
+				bpo = b_pixel.copy()
+				
+				# pixels are read in order r,g,b
+				
+				b_pixel[0] = list(b_pixel[0])
+				b_pixel[0][-2:] = messageBinary[0:2]
+				messageBinary = messageBinary[2:]
+				b_pixel[0] = ''.join(b_pixel[0])
+				
+				if len(b_pixel[0]) < 8:
+					b_pixel[0] = bpo[0]
+					print('fatal error while encoding')
+					raise ValueError
+				
+				b_pixel[1] = list(b_pixel[1])
+				b_pixel[1][-2:] = messageBinary[0:2]
+				messageBinary = messageBinary[2:]
+				b_pixel[1] = ''.join(b_pixel[1])
+				
+				# if one channel is not used for the pixel (ie, the str gets replaced as empty) then the pixel becomes the original value
+				if len(b_pixel[1]) < 8:
+					b_pixel[1] = bpo[1]
+				
+				b_pixel[2] = list(b_pixel[2])
+				b_pixel[2][-2:] = messageBinary[0:2]
+				messageBinary = messageBinary[2:]
+				b_pixel[2] = ''.join(b_pixel[2])
+				
+				if len(b_pixel[2]) < 8:
+					b_pixel[2] = bpo[2]
+				
+				newPixel = [int(x, 2) for x in b_pixel]
+				newPixel = tuple(newPixel)
+				
+				newPixels[i] = newPixel
+				
+				i += 1
+				if len(messageBinary) == 0:
+					break
+		
 		if output != '' and output != False and output is not None:
-			core.put_file_content(newpixels, output, core.imsize(path))
+			core.put_file_content(newPixels, output, core.imsize(self._path))
+		
+		if not output:
+			return [True, newPixels]
 	
-		return [True,newpixels]
-
-
 	def extract_message(self):
 		
-	
 		pixels = self._pixels
-	
-		bitstream = ''
-		length = self._extract_length(pixels)
-	
-		for p in pixels[0:length]:
-			#this 0:length will overshoot the number of pixels required. I need to cut this down. need to find what divisor to use that will minimally overshoot
-			#at the minimum, it will stop it decoding every pixel, which takes a long time.
-			for c in p:
-				c = core.int_to_bin(c)
-				p = c[-2:]
-				bitstream += p
-	
-		bs = bitstream[0:int(length)]
-	
-		asc = core.bin2asc(bs)
-		return ''.join(asc)
-	
-	
-	def _extract_length(self):
-		"""
-	
-		:param pixels: (list) pixels expected to have a valid stagger.naive-encoded image
-		:return: the expected length of the encoding. will be incorrect if the image was not encoded.
-		"""
-		pixels = self._pixels
+		buffer = ['']
+		buffer8 = ''
 		
-		length_pixels = [pixels[-3],pixels[-2], pixels[-1]]
-		bitstring = ''
+		try:
+			for pixel in pixels:
+				pixel = list(pixel)
+				p = [core.int_to_bin(x) for x in pixel]
+				
+				for b in p:
+					if len(buffer8) < 8:
+						buffer8 += b[-2:]
+					else:
+						if buffer8 == NULLBYTE:
+							raise ValueError('NULLBYTE')
+						buffer.append(buffer8)
+						buffer8 = b[-2:]
+		except ValueError as e:
+			if str(e) == 'NULLBYTE':
+				pass
+			else:
+				raise e
 	
-		for p in length_pixels:
-			r,g,b = p
-			bitstring += '{0:b}'.format(r)[-2::]
-			bitstring += '{0:b}'.format(g)[-2::]
-			bitstring += '{0:b}'.format(b)[-2::]
+		
+		messageBinary = ''.join(buffer)
+		
+		Message = core.text_from_bits(messageBinary)
+		return Message
+
+
+def _extract_length(self):
+	"""
+	This method was from a previous implementation where I XOR'd the LSBs of last 3 pixels with the first pixel to give a length so i can cut right at the point
 	
-		xorbits = ''
+	this is no longer used since the reimplementation of naive to use a NULLBYTE terminator.
 	
-		a, b, c = pixels[0]
-		a = "{0:b}".format(a)
-		b = "{0:b}".format(b)
-		c = "{0:b}".format(c)
-		for n in [a, b, c]:
-			while len(n) < 8:
-				n = '0' + n
-			xorbits += n
+	This may be reused for a different encoding, and as such is being left in
+	:param pixels: (list) pixels expected to have a valid stagger.naive-encoded image
+	:return: the expected length of the encoding. will be incorrect if the image was not encoded.
+	"""
+	pixels = self._pixels
 	
-		last_2 = pixels[-4]
-		_p = core.int_to_bin(last_2[0])
-		l2 = _p[-2:]
+	length_pixels = [pixels[-3], pixels[-2], pixels[-1]]
+	bitstring = ''
 	
+	for p in length_pixels:
+		r, g, b = p
+		bitstring += '{0:b}'.format(r)[-2::]
+		bitstring += '{0:b}'.format(g)[-2::]
+		bitstring += '{0:b}'.format(b)[-2::]
 	
-		bitstring = bitstring + l2
+	xorbits = ''
 	
-		length = (int(xorbits, 2) ^ int(bitstring, 2))
+	a, b, c = pixels[0]
+	a = "{0:b}".format(a)
+	b = "{0:b}".format(b)
+	c = "{0:b}".format(c)
+	for n in [a, b, c]:
+		while len(n) < 8:
+			n = '0' + n
+		xorbits += n
 	
-		return length
+	last_2 = pixels[-4]
+	_p = core.int_to_bin(last_2[0])
+	l2 = _p[-2:]
+	
+	bitstring = bitstring + l2
+	
+	length = (int(xorbits, 2) ^ int(bitstring, 2))
+	
+	return length
+
 
 if __name__ == '__main__':
 	print('This module provides utility only and should not be run by itself')

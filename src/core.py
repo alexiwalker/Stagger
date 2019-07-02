@@ -1,3 +1,6 @@
+if __name__ == '__main__':
+	raise NameError("Module does not support being run as '__main__'")
+
 import binascii
 import random
 
@@ -11,19 +14,19 @@ from PIL import Image
 
 
 def int_to_bin(n):
-	bin = '{0:b}'.format(n)
-	while len(bin) < 8:
-		bin = '0' + bin
+	_bin = '{0:b}'.format(n)
+	while len(_bin) < 8:
+		_bin = '0' + _bin
 	
-	return bin
+	return _bin
 
 
 def bitstream_to_8bit(binary):
-	bytes = []
+	_bytes = []
 	while binary != '':
-		bytes.append(binary[0:9])
+		_bytes.append(binary[0:9])
 		binary = binary[9:]
-	return bytes
+	return _bytes
 
 
 def get_file_content(image):
@@ -51,8 +54,8 @@ def string_to_ascii(string):
 	return bytelist
 
 
-def bin_to_int(bin):
-	return int(bin, 2)
+def bin_to_int(_bin):
+	return int(_bin, 2)
 
 
 def bytelist_to_string(bytelist):
@@ -64,7 +67,6 @@ def bytelist_to_string(bytelist):
 
 def imsize(path):
 	im = Image.open(path)
-	print(im.size)
 	return im.size
 
 
@@ -80,11 +82,11 @@ def int2bytes(i):
 
 
 def bin2asc(binary):
-	bytes = []
+	_bytes = []
 	while binary != '':
-		bytes.append(binary[0:8])
+		_bytes.append(binary[0:8])
 		binary = binary[8:]
-	return bytes
+	return _bytes
 
 
 def noise_image(path, size):
@@ -109,7 +111,3 @@ def noise_image(path, size):
 		pixels.append((r, g, b))
 	
 	put_file_content(pixels, path, size)
-
-
-if __name__ == '__main__':
-	print("This module provides functionality for the encoding classes and should not be run directly")
