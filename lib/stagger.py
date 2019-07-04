@@ -4,7 +4,7 @@ stagger encoding is an encoding that uses a reversible, recreatable way to distr
 Does not support JPG due to JPGs lossy compression
 """
 
-from src import core
+from lib import core
 import random
 
 lsb_random = ['00', '01', '10', '11']
@@ -121,7 +121,7 @@ class Stagger:
 			index+=1
 		
 		if output != '' and output != False and output is not None:
-			core.put_file_content(newPixels, output, core.imsize(self._path))
+			core.put_file_content(newPixels, output, core.image_size(self._path))
 		
 		if not output:
 			return [True, newPixels]

@@ -18,7 +18,7 @@ PNG does work. Other filetypes unteste
 
 """
 
-from src import core
+from lib import core
 
 
 class Linear:
@@ -84,7 +84,7 @@ class Linear:
 					break
 		
 		if output != '' and output != False and output is not None:
-			core.put_file_content(newPixels, output, core.imsize(self._path))
+			core.put_file_content(newPixels, output, core.image_size(self._path))
 		
 		if not output:
 			return [True, newPixels]

@@ -1,4 +1,4 @@
-from src import core
+from lib import core
 from PIL import Image
 
 def redback(original: str,secondary: str, outputfile: str):

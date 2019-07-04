@@ -17,6 +17,12 @@ from PIL import Image
 
 NULLBYTE = '00000000'
 
+def encoding_types():
+	return [
+		'Stagger',
+		'Linear'
+	]
+
 def int_to_bin(n):
 	_bin = '{0:b}'.format(n)
 	while len(_bin) < 8:
@@ -69,23 +75,23 @@ def bytelist_to_string(bytelist):
 	return bytestring
 
 
-def imsize(path):
+def image_size(path):
 	im = Image.open(path)
 	return im.size
 
 
 def text_from_bits(bits, encoding='utf-8', errors='surrogatepass'):
 	n = int(bits, 2)
-	return int2bytes(n).decode(encoding, errors)
+	return int_to_bytes(n).decode(encoding, errors)
 
 
-def int2bytes(i):
+def int_to_bytes(i):
 	hex_string = '%x' % i
 	n = len(hex_string)
 	return binascii.unhexlify(hex_string.zfill(n + (n & 1)))
 
 
-def bin2asc(binary):
+def bin_to_ascii(binary):
 	_bytes = []
 	while binary != '':
 		_bytes.append(binary[0:8])
