@@ -17,12 +17,11 @@ Does not work on jpegs due to compression causing artifacting and damaging pixel
 PNG does work. Other filetypes unteste
 
 """
-NULLBYTE = '00000000'
 
 from src import core
 
 
-class Naive:
+class Linear:
 	def __init__(self, imcontents):
 		
 		if type(imcontents) == str:
@@ -37,7 +36,7 @@ class Naive:
 		pixels = self._pixels
 		newPixels = pixels.copy()
 		messageBinary = ''.join(core.string_to_ascii(message))
-		messageBinary += NULLBYTE
+		messageBinary += core.NULLBYTE
 		
 		i = 0
 		while len(messageBinary) > 0:
@@ -105,7 +104,7 @@ class Naive:
 					if len(buffer8) < 8:
 						buffer8 += b[-2:]
 					else:
-						if buffer8 == NULLBYTE:
+						if buffer8 == core.NULLBYTE:
 							raise core.LevelBreak('NULLBYTE')
 						buffer.append(buffer8)
 						buffer8 = b[-2:]

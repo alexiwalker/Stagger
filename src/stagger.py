@@ -6,13 +6,20 @@ Does not support JPG due to JPGs lossy compression
 
 from src import core
 import random
-lsb_random = ['00','01','10','11']
 
-class stagger:
+lsb_random = ['00', '01', '10', '11']
+
+
+class Stagger:
 	
-	def __init__(self, imagepath):
-		self._path = imagepath
-		self._pixels = core.get_file_content(self._path)
+	def __init__(self, imcontents):
+		if type(imcontents) == str:
+			self._path = imcontents
+			self._pixels = core.get_file_content(self._path)
+		
+		
+		elif type(imcontents) == list:
+			self._pixels = imcontents
 	
 	def encode_message(self, message, output=None):
 		"""
@@ -31,10 +38,12 @@ class stagger:
 		pixels = self._pixels
 		newPixels = self._pixels.copy()
 		
-		messageBinary = core.string_to_ascii(message+'00000000')
-		
+		messageBinary = core.string_to_ascii(message)
+		messageBinary = ''.join(messageBinary)
+		messageBinary += core.NULLBYTE
 		i = 0
 		messagePixels = []
+		
 		while len(messageBinary) > 0:
 			pixel = pixels[i]
 			r, g, b = pixel
@@ -43,7 +52,6 @@ class stagger:
 			bpo = b_pixel.copy()
 			
 			# pixels are read in order r,g,b
-			
 			b_pixel[0] = list(b_pixel[0])
 			b_pixel[0][-2:] = messageBinary[0:2]
 			messageBinary = messageBinary[2:]
@@ -51,8 +59,7 @@ class stagger:
 			
 			if len(b_pixel[0]) < 8:
 				b_pixel[0] = bpo[0]
-				print('fatal error while encoding')
-				raise ValueError
+				raise ValueError('fatal error while encoding')
 			
 			b_pixel[1] = list(b_pixel[1])
 			b_pixel[1][-2:] = messageBinary[0:2]
@@ -86,29 +93,27 @@ class stagger:
 				r = core.int_to_bin(r)
 				g = core.int_to_bin(g)
 				b = core.int_to_bin(b)
-				
+
 				r = list(r)
 				g = list(g)
 				b = list(b)
-				
+
 				r[-2:] = lsb_random[random.randint(0,3)]
 				g[-2:] = lsb_random[random.randint(0,3)]
 				b[-2:] = lsb_random[random.randint(0,3)]
-				
+
 				r = ''.join(r)
 				g = ''.join(g)
 				b = ''.join(b)
-				
+
 				r = core.bin_to_int(r)
 				g = core.bin_to_int(g)
 				b = core.bin_to_int(b)
-				
+
 				p = (r,g,b)
 				newPixels[index] = p
 			index+=1
 		
-		
-		print('done encoding')
 		if output != '' and output != False and output is not None:
 			core.put_file_content(newPixels, output, core.imsize(self._path))
 		
@@ -118,9 +123,9 @@ class stagger:
 	@staticmethod
 	def _jump_length(r):
 		r_ = core.int_to_bin(r)
-		r_ = r_[0:7]
+		r_ = r_[0:6]
 		r_ = core.bin_to_int(r_)
-		
+		r_ += 1
 		return r_
 	
 	def extract_message(self) -> str:
@@ -128,8 +133,35 @@ class stagger:
 		
 		:return: (str) the extracted message from the image. Will be nonsensical if the image provided is not properly encoded.
 		"""
-		message = ""
+		i = 0
+		pixels = self._pixels
+		buffer = ['']
+		buffer8 = ''
+		try:
+			while True:
+				pixel = pixels[i]
+				r, g, b = pixel
+				pixel_jump = self._jump_length(r)
+				
+				p = [core.int_to_bin(x) for x in pixel]
+				for b in p:
+					if len(buffer8) < 8:
+						buffer8 += b[-2:]
+					else:
+						if buffer8 == core.NULLBYTE:
+							raise core.LevelBreak('NULLBYTE')
+						buffer.append(buffer8)
+						buffer8 = b[-2:]
+				
+				if i > len(pixels):
+					raise ValueError('Message could not be extracted: Null byte not found')
+				i += pixel_jump
 		
+		except core.LevelBreak:
+			pass
+		
+		message = ''.join(buffer)
+		message = core.text_from_bits(message)
 		return message
 	
 	def _extract_length(self):
@@ -143,6 +175,4 @@ class stagger:
 
 
 if __name__ == '__main__':
-	# testing mode: this is running in place to test the module
-	# s = stagger("test.jpg")
 	print('This module provides utility only and should not be run by itself')

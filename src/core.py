@@ -15,6 +15,7 @@ class LevelBreak(Exception):
 
 from PIL import Image
 
+NULLBYTE = '00000000'
 
 def int_to_bin(n):
 	_bin = '{0:b}'.format(n)

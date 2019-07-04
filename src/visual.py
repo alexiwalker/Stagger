@@ -39,3 +39,4 @@ def redback(original: str,secondary: str, outputfile: str):
 	img2 = Image.new('RGB', size, 'white')
 	img2.putdata(dif)
 	img2.save(outputfile)
+	
