@@ -9,10 +9,14 @@ import random
 
 lsb_random = ['00', '01', '10', '11']
 
-
 class Stagger:
 	
 	def __init__(self, imcontents):
+		"""
+				:param imcontents: The image to be used as the base to encode from
+				:type imcontents: list or str
+		"""
+		
 		if type(imcontents) == str:
 			self._path = imcontents
 			self._pixels = core.get_file_content(self._path)
@@ -23,7 +27,6 @@ class Stagger:
 	
 	def encode_message(self, message, output=None):
 		"""
-		
 		:param message:The message to encode
 		:type message: str
 		:param output: a string to the path for the file to be saved to, or None for it to return a list of pixels
@@ -86,6 +89,9 @@ class Stagger:
 			i += self._jump_length(r)
 		
 		#Randomise 2 LSB of every pixel not used to store the message, to mess with visual attacks
+		# >core.redback will show some pixels as unmodified,
+		# >as just by luck the rng will give some pixels the same 2 LSB on all 3 channels
+		# >this is fine.
 		index = 0
 		for pixel in newPixels:
 			if index not in messagePixels:
@@ -121,7 +127,16 @@ class Stagger:
 			return [True, newPixels]
 	
 	@staticmethod
-	def _jump_length(r):
+	def _jump_length(r) -> int:
+		"""
+		Calculates the 8bit binary of the integer given (0-255) and uses the first 6 digits of it (unaffected by LSB modifications
+		to calculate the number of pixels forward to jump. +1.
+		This means up to 64 pixels can be skipped at once
+		for a 1920x1080 image, 32400 pixels may be used
+		((1920*1080 image)/64 pixels available )*6 bits per image)/8 bits per character = maximum length of 24300 character message
+		:param r: int
+		:return: int
+		"""
 		r_ = core.int_to_bin(r)
 		r_ = r_[0:6]
 		r_ = core.bin_to_int(r_)
