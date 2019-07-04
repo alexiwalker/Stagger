@@ -17,14 +17,14 @@ all encodings are instantiated as an object.
 
 ~~~
 
-a = stagger.naive("test.png")
+a = src.Linear("test.png")
 
 a.encode_message("This is how the stagger naive encoding is used", "test2.png")
 
 # In encode_message, the path provided is where the encoded image is saved.
 # If this param is omitted, the encoded image is returned as a list of pixels (each pixel = a tuple of (r,g,b) ints)
 
-b = stagger.naive("test2.png")
+b = src.Linear("test2.png")
 
 message = b.extract_message()
 
