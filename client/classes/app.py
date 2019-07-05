@@ -1,4 +1,5 @@
 import tkinter as tk
+from client.classes.ui import imageViewer as imageViewer
 
 class App:
 	def __init__(self):
@@ -7,6 +8,12 @@ class App:
 		self._root.title("Stagger")
 		self._root.protocol("WM_DELETE_WINDOW", self.applicationExit)
 		self._root.minsize(700,700)
+		
+		
+		# self._viewer = imageViewer.imageViewer(self._root)
+		# self._viewer.pack()
+		
+		
 		
 	def mainLoop(self):
 		"""
