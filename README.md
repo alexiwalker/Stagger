@@ -1,12 +1,9 @@
 # Stagger
 Python Steganography
 
-Note: Stagger is currently being reworked from a single standalone file to a properly structured module. Details in the README reflect how it will be once this transition is complete. This message will be removed at that time
-
-
 -----
 
-Stagger is a Python Steganography module developed by Alex W. and is not intended for serious usage. It currently has 2 encodings: naive (concurrent least significant bits encoding) and stagger (LSB pixel encoding distributed nonlinearly throughout the image in a way that can be predictably reversed)
+Stagger is a Python Steganography module developed by Alex W. and is not intended for serious usage. It currently has 2 encodings: Linear (concurrent pixel least significant bits encoding) and Stagger (next pixels index incremented by the first 6 bits, +1(decimal) of the current pixel's red channel, eg red b"10011001" would increment pixel index by 100110 -> 38 -> +1 39)
 
 ----
 
