@@ -35,7 +35,6 @@ def redback(original: str,secondary: str, outputfile: str):
 
 	im = Image.open(originalpath)
 	size = im.size
-	print(size)
 	img2 = Image.new('RGB', size, 'white')
 	img2.putdata(dif)
 	img2.save(outputfile)

@@ -24,6 +24,42 @@ class Stagger:
 		
 		elif type(imcontents) == list:
 			self._pixels = imcontents
+			
+	@staticmethod
+	def encode_pixel(binaryPixel,messageBinary):
+		binaryPixelOriginal = binaryPixel.copy()
+		
+		# pixels are read in order r,g,b
+		binaryPixel[0] = list(binaryPixel[0])
+		binaryPixel[0][-2:] = messageBinary[0:2]
+		messageBinary = messageBinary[2:]
+		binaryPixel[0] = ''.join(binaryPixel[0])
+		
+		if len(binaryPixel[0]) < 8:
+			binaryPixel[0] = binaryPixelOriginal[0]
+			raise ValueError('fatal error while encoding')
+		
+		binaryPixel[1] = list(binaryPixel[1])
+		binaryPixel[1][-2:] = messageBinary[0:2]
+		messageBinary = messageBinary[2:]
+		binaryPixel[1] = ''.join(binaryPixel[1])
+		
+		# if one channel is not used for the pixel (ie, the str gets replaced as empty) then the pixel becomes the original value
+		if len(binaryPixel[1]) < 8:
+			binaryPixel[1] = binaryPixelOriginal[1]
+		
+		binaryPixel[2] = list(binaryPixel[2])
+		binaryPixel[2][-2:] = messageBinary[0:2]
+		messageBinary = messageBinary[2:]
+		binaryPixel[2] = ''.join(binaryPixel[2])
+		
+		if len(binaryPixel[2]) < 8:
+			binaryPixel[2] = binaryPixelOriginal[2]
+		
+		newPixel = [int(x, 2) for x in binaryPixel]
+		newPixel = tuple(newPixel)
+		
+		return newPixel, messageBinary
 	
 	def encode_message(self, message, output=None):
 		"""
@@ -49,49 +85,20 @@ class Stagger:
 		
 		while len(messageBinary) > 0:
 			pixel = pixels[i]
-			r, g, b = pixel
 			
-			b_pixel = [core.int_to_bin(x) for x in pixel]
-			bpo = b_pixel.copy()
+			binaryPixel = [core.int_to_bin(x) for x in pixel]
 			
-			# pixels are read in order r,g,b
-			b_pixel[0] = list(b_pixel[0])
-			b_pixel[0][-2:] = messageBinary[0:2]
-			messageBinary = messageBinary[2:]
-			b_pixel[0] = ''.join(b_pixel[0])
-			
-			if len(b_pixel[0]) < 8:
-				b_pixel[0] = bpo[0]
-				raise ValueError('fatal error while encoding')
-			
-			b_pixel[1] = list(b_pixel[1])
-			b_pixel[1][-2:] = messageBinary[0:2]
-			messageBinary = messageBinary[2:]
-			b_pixel[1] = ''.join(b_pixel[1])
-			
-			# if one channel is not used for the pixel (ie, the str gets replaced as empty) then the pixel becomes the original value
-			if len(b_pixel[1]) < 8:
-				b_pixel[1] = bpo[1]
-			
-			b_pixel[2] = list(b_pixel[2])
-			b_pixel[2][-2:] = messageBinary[0:2]
-			messageBinary = messageBinary[2:]
-			b_pixel[2] = ''.join(b_pixel[2])
-			
-			if len(b_pixel[2]) < 8:
-				b_pixel[2] = bpo[2]
-			
-			newPixel = [int(x, 2) for x in b_pixel]
-			newPixel = tuple(newPixel)
+			newPixel, messageBinary = self.encode_pixel(binaryPixel, messageBinary)
 			
 			newPixels[i] = newPixel
 			messagePixels.append(i)
-			i += self._jump_length(r)
+			i += self._jump_length(pixel[0])
 		
 		#Randomise 2 LSB of every pixel not used to store the message, to mess with visual attacks
 		# >core.redback will show some pixels as unmodified,
 		# >as just by luck the rng will give some pixels the same 2 LSB on all 3 channels
 		# >this is fine.
+		
 		index = 0
 		for pixel in newPixels:
 			if index not in messagePixels:
@@ -179,15 +186,6 @@ class Stagger:
 		message = core.text_from_bits(message)
 		return message
 	
-	def _extract_length(self):
-		"""
-		
-		:param pixels: (list) pixels expected to have a valid stagger.stagger-encoded image
-		:type pixels: list
-		:return: the expected length of the encoding. will be incorrect if the image was not encoded.
-		"""
-		pass
-
 
 if __name__ == '__main__':
 	print('This module provides utility only and should not be run by itself')

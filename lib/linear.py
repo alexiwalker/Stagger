@@ -42,40 +42,11 @@ class Linear:
 		while len(messageBinary) > 0:
 			for pixel in pixels:
 				
-				b_pixel = [core.int_to_bin(x) for x in pixel]
-				bpo = b_pixel.copy()
+				binaryPixel = [core.int_to_bin(x) for x in pixel]
 				
 				# pixels are read in order r,g,b
-				
-				b_pixel[0] = list(b_pixel[0])
-				b_pixel[0][-2:] = messageBinary[0:2]
-				messageBinary = messageBinary[2:]
-				b_pixel[0] = ''.join(b_pixel[0])
-				
-				if len(b_pixel[0]) < 8:
-					b_pixel[0] = bpo[0]
-					print('fatal error while encoding')
-					raise ValueError
-				
-				b_pixel[1] = list(b_pixel[1])
-				b_pixel[1][-2:] = messageBinary[0:2]
-				messageBinary = messageBinary[2:]
-				b_pixel[1] = ''.join(b_pixel[1])
-				
-				# if one channel is not used for the pixel (ie, the str gets replaced as empty) then the pixel becomes the original value
-				if len(b_pixel[1]) < 8:
-					b_pixel[1] = bpo[1]
-				
-				b_pixel[2] = list(b_pixel[2])
-				b_pixel[2][-2:] = messageBinary[0:2]
-				messageBinary = messageBinary[2:]
-				b_pixel[2] = ''.join(b_pixel[2])
-				
-				if len(b_pixel[2]) < 8:
-					b_pixel[2] = bpo[2]
-				
-				newPixel = [int(x, 2) for x in b_pixel]
-				newPixel = tuple(newPixel)
+
+				newPixel, messageBinary = self.encode_pixel(binaryPixel,messageBinary)
 				
 				newPixels[i] = newPixel
 				
@@ -88,6 +59,42 @@ class Linear:
 		
 		if not output:
 			return [True, newPixels]
+		
+	@staticmethod
+	def encode_pixel(binaryPixel,messageBinary):
+		originalBinaryPixel = binaryPixel.copy()
+		
+		binaryPixel[0] = list(binaryPixel[0])
+		binaryPixel[0][-2:] = messageBinary[0:2]
+		messageBinary = messageBinary[2:]
+		binaryPixel[0] = ''.join(binaryPixel[0])
+		
+		if len(binaryPixel[0]) < 8:
+			binaryPixel[0] = originalBinaryPixel[0]
+			print('fatal error while encoding: nothing to encode')
+			raise ValueError
+		
+		binaryPixel[1] = list(binaryPixel[1])
+		binaryPixel[1][-2:] = messageBinary[0:2]
+		messageBinary = messageBinary[2:]
+		binaryPixel[1] = ''.join(binaryPixel[1])
+		
+		# if one channel is not used for the pixel (ie, the str gets replaced as empty) then the pixel becomes the original value
+		if len(binaryPixel[1]) < 8:
+			binaryPixel[1] = originalBinaryPixel[1]
+		
+		binaryPixel[2] = list(binaryPixel[2])
+		binaryPixel[2][-2:] = messageBinary[0:2]
+		messageBinary = messageBinary[2:]
+		binaryPixel[2] = ''.join(binaryPixel[2])
+		
+		if len(binaryPixel[2]) < 8:
+			binaryPixel[2] = originalBinaryPixel[2]
+		
+		newPixel = [int(x, 2) for x in binaryPixel]
+		newPixel = tuple(newPixel)
+		
+		return newPixel, messageBinary
 	
 	def extract_message(self):
 		
@@ -118,47 +125,51 @@ class Linear:
 		return Message
 
 
-def _extract_length(self):
-	"""
-	This method was from a previous implementation where I XOR'd the LSBs of last 3 pixels with the first pixel to give a length so i can cut right at the point
-	
-	this is no longer used since the reimplementation of naive to use a NULLBYTE terminator.
-	
-	This may be reused for a different encoding, and as such is being left in
-	:param pixels: (list) pixels expected to have a valid stagger.naive-encoded image
-	:return: the expected length of the encoding. will be incorrect if the image was not encoded.
-	"""
-	pixels = self._pixels
-	
-	length_pixels = [pixels[-3], pixels[-2], pixels[-1]]
-	bitstring = ''
-	
-	for p in length_pixels:
-		r, g, b = p
-		bitstring += '{0:b}'.format(r)[-2::]
-		bitstring += '{0:b}'.format(g)[-2::]
-		bitstring += '{0:b}'.format(b)[-2::]
-	
-	xorbits = ''
-	
-	a, b, c = pixels[0]
-	a = "{0:b}".format(a)
-	b = "{0:b}".format(b)
-	c = "{0:b}".format(c)
-	for n in [a, b, c]:
-		while len(n) < 8:
-			n = '0' + n
-		xorbits += n
-	
-	last_2 = pixels[-4]
-	_p = core.int_to_bin(last_2[0])
-	l2 = _p[-2:]
-	
-	bitstring = bitstring + l2
-	
-	length = (int(xorbits, 2) ^ int(bitstring, 2))
-	
-	return length
+	def _extract_length(self,pixels = None):
+		"""
+		This method was from a previous implementation where I XOR'd the LSBs of last 3 pixels with the first pixel to give a length so i can cut right at the point
+		
+		this is no longer used since the reimplementation of naive to use a NULLBYTE terminator.
+		
+		It is being kept for future reference
+		
+		This may be reused for a different encoding, and as such is being left in
+		:param pixels: (list) pixels expected to have a valid stagger.naive-encoded image
+		:return: the expected length of the encoding. will be incorrect if the image was not encoded.
+		"""
+		
+		if pixels is not None:
+			pixels = self._pixels
+		
+		length_pixels = [pixels[-3], pixels[-2], pixels[-1]]
+		bitstring = ''
+		
+		for p in length_pixels:
+			r, g, b = p
+			bitstring += '{0:b}'.format(r)[-2::]
+			bitstring += '{0:b}'.format(g)[-2::]
+			bitstring += '{0:b}'.format(b)[-2::]
+		
+		xorbits = ''
+		
+		a, b, c = pixels[0]
+		a = "{0:b}".format(a)
+		b = "{0:b}".format(b)
+		c = "{0:b}".format(c)
+		for n in [a, b, c]:
+			while len(n) < 8:
+				n = '0' + n
+			xorbits += n
+		
+		last_2 = pixels[-4]
+		_p = core.int_to_bin(last_2[0])
+		l2 = _p[-2:]
+		
+		bitstring = bitstring + l2
+		
+		length = (int(xorbits, 2) ^ int(bitstring, 2))
+		
+		return length
 
 
 if __name__ == '__main__':
