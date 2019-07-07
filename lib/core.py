@@ -34,8 +34,9 @@ def int_to_bin(n):
 def bitstream_to_8bit(binary):
 	_bytes = []
 	while binary != '':
-		_bytes.append(binary[0:9])
-		binary = binary[9:]
+		_bytes.append(binary[0:8])
+		binary = binary[8:]
+
 	return _bytes
 
 

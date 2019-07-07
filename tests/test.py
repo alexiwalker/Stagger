@@ -1,5 +1,6 @@
 from lib import linear, core, stagger, visual
 import os
+import random
 
 # lib is symlinked from the main lib folder for ease of use
 
@@ -7,7 +8,7 @@ TEST_MESSAGE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 the quick brown fox Jumped 
 
 BASE_IMAGE = "images/test.png"
 
-class test:
+class Encode:
 
 	@staticmethod
 	def Linear():
@@ -35,7 +36,63 @@ class test:
 		
 		print('stagger.Stagger OK')
 
+	def __init__(self):
+		self.Linear()
+		self.Stagger()
+
+class Core:
+	def __init__(self):
+		self.int_to_bin()
+		self.bitstream_to_8bit()
+
+	@staticmethod
+	def int_to_bin():
+		a = 255 #11111111
+		b = 32 #00100000
+		c = 368 #101110000
+
+		a = core.int_to_bin(a)
+		b = core.int_to_bin(b)
+		c = core.int_to_bin(c)
+
+		assert a == '11111111'
+		assert b == '00100000'
+		assert len(b) > 6
+		assert c == '101110000'
+
+		print('int_to_bin OK')
+
+	@staticmethod
+	def bitstream_to_8bit():
+		stream = ''
+		for i in range(0, 20*8):
+			stream += str(random.randint(0,1))
+		_8bit = core.bitstream_to_8bit(stream)
+
+		for _byte in _8bit:
+			assert len(_byte) == 8
+			evar = False
+			try:
+				core.bin_to_int(_byte)
+			except ValueError:
+				evar = True
+
+			assert not evar
+
+		_stream = ''.join(_8bit)
+
+		assert _stream == stream
+
+		print('bitstream_to_8bit OK')
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
-	test.Linear()
-	test.Stagger()
+	Encode()
+	Core()
