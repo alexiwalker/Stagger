@@ -11,11 +11,15 @@ lsb_random = ['00', '01', '10', '11']
 
 class Stagger:
 	
-	def __init__(self, imcontents):
+	def __init__(self, imcontents, skip_noise = False):
 		"""
 				:param imcontents: The image to be used as the base to encode from
 				:type imcontents: list or str
+				:param skip_noise: Noise LSB of pixels not required for the encoding. Protects against raw visual attacks but increases encode time.
+				:type skip_noise: bool
 		"""
+
+		self._skip_noise = skip_noise
 		
 		if type(imcontents) == str:
 			self._path = imcontents
@@ -100,32 +104,34 @@ class Stagger:
 		# >this is fine.
 		
 		index = 0
-		for pixel in newPixels:
-			if index not in messagePixels:
-				r,g,b = pixel
-				r = core.int_to_bin(r)
-				g = core.int_to_bin(g)
-				b = core.int_to_bin(b)
 
-				r = list(r)
-				g = list(g)
-				b = list(b)
+		if not self._skip_noise:
+			for pixel in newPixels:
+				if index not in messagePixels:
+					r,g,b = pixel
+					r = core.int_to_bin(r)
+					g = core.int_to_bin(g)
+					b = core.int_to_bin(b)
 
-				r[-2:] = lsb_random[random.randint(0,3)]
-				g[-2:] = lsb_random[random.randint(0,3)]
-				b[-2:] = lsb_random[random.randint(0,3)]
+					r = list(r)
+					g = list(g)
+					b = list(b)
 
-				r = ''.join(r)
-				g = ''.join(g)
-				b = ''.join(b)
+					r[-2:] = lsb_random[random.randint(0,3)]
+					g[-2:] = lsb_random[random.randint(0,3)]
+					b[-2:] = lsb_random[random.randint(0,3)]
 
-				r = core.bin_to_int(r)
-				g = core.bin_to_int(g)
-				b = core.bin_to_int(b)
+					r = ''.join(r)
+					g = ''.join(g)
+					b = ''.join(b)
 
-				p = (r,g,b)
-				newPixels[index] = p
-			index+=1
+					r = core.bin_to_int(r)
+					g = core.bin_to_int(g)
+					b = core.bin_to_int(b)
+
+					p = (r,g,b)
+					newPixels[index] = p
+				index+=1
 		
 		if output != '' and output != False and output is not None:
 			core.put_file_content(newPixels, output, core.image_size(self._path))

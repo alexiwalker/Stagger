@@ -5,7 +5,6 @@
 *.jpg
 *.gif
 *.jpeg
-*tests*
 *.dpy
 *shelf*
-tests/images
+tests/images/*.png
