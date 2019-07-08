@@ -21,9 +21,10 @@ PNG does work. Other filetypes unteste
 from lib import core
 
 
-class Linear:
+class Linear(core.Protocol):
 	def __init__(self, imcontents):
-		
+
+		super(Linear, self).__init__()
 		if type(imcontents) == str:
 			self._path = imcontents
 			self._pixels = core.get_file_content(self._path)
@@ -46,7 +47,7 @@ class Linear:
 				
 				# pixels are read in order r,g,b
 
-				newPixel, messageBinary = self.encode_pixel(binaryPixel,messageBinary)
+				newPixel, messageBinary = self._encode_pixel(binaryPixel, messageBinary)
 				
 				newPixels[i] = newPixel
 				
@@ -61,7 +62,7 @@ class Linear:
 			return [True, newPixels]
 		
 	@staticmethod
-	def encode_pixel(binaryPixel,messageBinary):
+	def _encode_pixel(binaryPixel, messageBinary):
 		originalBinaryPixel = binaryPixel.copy()
 		
 		binaryPixel[0] = list(binaryPixel[0])

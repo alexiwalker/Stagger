@@ -1,4 +1,4 @@
-import client.classes.app as App
+import gui.classes.app as App
 
 
 def main():

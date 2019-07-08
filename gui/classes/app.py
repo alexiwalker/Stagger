@@ -1,5 +1,5 @@
 import tkinter as tk
-from client.classes.ui import imageViewer as imageViewer
+from gui.classes.ui import imageViewer as imageViewer
 
 
 class App:

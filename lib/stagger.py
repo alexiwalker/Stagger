@@ -9,7 +9,7 @@ import random
 
 lsb_random = ['00', '01', '10', '11']
 
-class Stagger:
+class Stagger(core.Protocol):
 	
 	def __init__(self, imcontents, skip_noise = False):
 		"""
@@ -20,7 +20,7 @@ class Stagger:
 		"""
 
 		self._skip_noise = skip_noise
-		
+		super(Stagger, self).__init__()
 		if type(imcontents) == str:
 			self._path = imcontents
 			self._pixels = core.get_file_content(self._path)
@@ -30,7 +30,7 @@ class Stagger:
 			self._pixels = imcontents
 			
 	@staticmethod
-	def encode_pixel(binaryPixel,messageBinary):
+	def _encode_pixel(binaryPixel, messageBinary):
 		binaryPixelOriginal = binaryPixel.copy()
 		
 		# pixels are read in order r,g,b
@@ -92,7 +92,7 @@ class Stagger:
 			
 			binaryPixel = [core.int_to_bin(x) for x in pixel]
 			
-			newPixel, messageBinary = self.encode_pixel(binaryPixel, messageBinary)
+			newPixel, messageBinary = self._encode_pixel(binaryPixel, messageBinary)
 			
 			newPixels[i] = newPixel
 			messagePixels.append(i)
@@ -190,6 +190,8 @@ class Stagger:
 		
 		message = ''.join(buffer)
 		message = core.text_from_bits(message)
+
+		assert type(message) == str
 		return message
 	
 

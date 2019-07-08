@@ -122,3 +122,14 @@ def noise_image(path, size):
 		pixels.append((r, g, b))
 	
 	put_file_content(pixels, path, size)
+
+
+class Protocol:
+	def encode_message(self, message, output=None):
+		raise NotImplementedError
+
+	def extract_message(self):
+		raise NotImplementedError
+
+	def __init__(self):
+		pass
