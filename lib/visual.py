@@ -9,7 +9,7 @@ def redback(original: str,secondary: str, outputfile: str):
 	:param original :(str) Path to the original file
 	:param secondary: (str) Path to the second file
 	:param outputfile: (str) Path for the output (difference) to save to.
-	:return: Void
+	:return: None
 	"""
 	originalpath = original
 	original = core.get_file_content(original)
@@ -26,7 +26,7 @@ def redback(original: str,secondary: str, outputfile: str):
 		b3 = abs(b1-b2)
 
 		if r3 != 0 or g3 != 0 or b3 != 0:
-			dif.append((r3*5,g3*5,b3*5))
+			dif.append((r3*80,g3*80,b3*80))
 		else:
 			dif.append((255,0,0))
 

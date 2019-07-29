@@ -2,11 +2,13 @@ from lib import linear, core, stagger, visual
 import os
 import random
 import inspect
+import string
 __FNAME__ = lambda: inspect.stack()[1][3]
 
 TEST_MESSAGE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 the quick brown fox Jumped over the lazy dog'
 
-BASE_IMAGE = "images/test.png"
+BASE_IMAGE = "images/large.png"
+SMALL_IMAGE = "images/small.png"
 
 
 class Encode:
@@ -24,10 +26,14 @@ class Encode:
 
         print(f'linear.{__FNAME__()} OK')
 
+
     @staticmethod
     def Stagger():
         if not os.path.exists(BASE_IMAGE):
             core.noise_image(BASE_IMAGE, (1920, 1080))
+
+        if not os.path.exists(SMALL_IMAGE):
+            core.noise_image(SMALL_IMAGE, (100, 100))
 
         n = stagger.Stagger(BASE_IMAGE)
         px = n.encode_message(TEST_MESSAGE)
@@ -35,10 +41,32 @@ class Encode:
         assert px[0]
         assert stagger.Stagger(px[1]).extract_message() == TEST_MESSAGE
 
+        n = stagger.Stagger(SMALL_IMAGE)
+        maximum_len = n.message_maximum_length()
+
+        generated_message  = ''
+
+        for i in range(1,maximum_len):
+            generated_message += random.choice(string.ascii_letters)
+
+        px = n.encode_message(generated_message)
+        assert stagger.Stagger(px[1]).extract_message() == generated_message
+
+        generated_message += "a"
+        try_value = False
+
+        try:
+            stagger.Stagger(SMALL_IMAGE).encode_message(generated_message)
+        except ValueError:
+            try_value = True
+
+        assert try_value
+
+
         print(f'stagger.{__FNAME__()} OK')
 
     def __init__(self):
-        self.Linear()
+        # self.Linear()
         self.Stagger()
 
 

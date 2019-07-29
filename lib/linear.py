@@ -172,6 +172,8 @@ class Linear(core.Protocol):
 		
 		return length
 
+	def message_maximum_length(self):
+		return (6*len(self._pixels))//8
 
 if __name__ == '__main__':
 	print('This module provides utility only and should not be run by itself')

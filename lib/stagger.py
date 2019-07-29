@@ -74,10 +74,10 @@ class Stagger(core.Protocol):
 		:return:  None returned if output path specified, as image will be saved to the path. List of pixels returned if nothing provided for output
 		:exception: (ValueError)
 		"""
-		if (len(self._pixels) // 63) - 6 < len(message):
+		if (len(self._pixels) // 63) < len(message):
 			raise ValueError(f"Message too long. "
 			                 f"This image can only encode a message with a length of {(len(self._pixels) // 63) - 12} ")
-		
+
 		pixels = self._pixels
 		newPixels = self._pixels.copy()
 		
@@ -193,7 +193,9 @@ class Stagger(core.Protocol):
 
 		assert type(message) == str
 		return message
-	
+
+	def message_maximum_length(self):
+		return (len(self._pixels) // 63)+1
 
 if __name__ == '__main__':
 	print('This module provides utility only and should not be run by itself')
